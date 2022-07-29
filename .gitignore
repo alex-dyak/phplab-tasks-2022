@@ -2,3 +2,10 @@
 .phpunit.result.cache
 vendor
 src/db/config.php
+
+composer.phar
+
+docker-compose.yml
+default.conf
+
+index.php
