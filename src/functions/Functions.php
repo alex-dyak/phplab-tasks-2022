@@ -94,8 +94,22 @@ class Functions
      * @return array
      * @throws InvalidArgumentException
      */
-    public function countArgumentsWrapper(): array
+    public function countArgumentsWrapper($args): array
     {
-        // put your code here
+        if ($args) {
+            if (is_array($args)) {
+                foreach ($args as $arg) {
+                    if (!is_string($arg)) {
+                        throw new InvalidArgumentException('Arg should be a string');
+                    }
+                }
+            } else {
+                if (!is_string($args)) {
+                    throw new InvalidArgumentException('Arg should be a string');
+                }
+            }
+        }
+
+        return $this->countArguments(...$args);
     }
 }
