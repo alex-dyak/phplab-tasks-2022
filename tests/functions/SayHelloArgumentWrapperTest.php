@@ -1,7 +1,11 @@
 <?php
 
+namespace functions;
 
+use functions;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class SayHelloArgumentWrapperTest extends TestCase
 {
@@ -13,16 +17,16 @@ class SayHelloArgumentWrapperTest extends TestCase
     }
 
     /**
-     * @dataProvider negativeDataProvider
+     * @dataProvider incorrectArgumentTypeDataProvider
      */
-    public function testNegative($arg, $expected)
+    public function testIncorrectArgumentType($arg, $expected)
     {
         $this->expectException(InvalidArgumentException::class);
 
         $this->assertEquals($expected,$this->functions->sayHelloArgumentWrapper($arg));
     }
 
-    public function negativeDataProvider(): array
+    public function incorrectArgumentTypeDataProvider(): array
     {
         return [
             [[1,2,3], new InvalidArgumentException('Arg should be: number, string or bool')],

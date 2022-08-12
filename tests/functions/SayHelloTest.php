@@ -1,5 +1,8 @@
 <?php
 
+namespace functions;
+
+use functions;
 use PHPUnit\Framework\TestCase;
 
 class SayHelloTest extends TestCase
