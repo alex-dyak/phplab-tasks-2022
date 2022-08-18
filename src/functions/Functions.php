@@ -19,6 +19,8 @@
 
 namespace functions;
 
+use InvalidArgumentException;
+
 class Functions
 {
     /**
@@ -52,12 +54,15 @@ class Functions
      * !!! you need to test only exceptional case, since the behavior of sayHelloArgument was already tested in the task above
      *
      * @param $arg
+     *
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function sayHelloArgumentWrapper($arg): string
     {
-        // put your code here
+        if (!is_numeric($arg) || !is_string($arg) || !is_bool($arg)) {
+            throw new InvalidArgumentException('Arg should be: number, string or bool');
+        }
 
         return $this->sayHelloArgument($arg);
     }
@@ -87,10 +92,24 @@ class Functions
      * @see https://www.php.net/manual/en/migration56.new-features.php#migration56.new-features.splat
      *
      * @return array
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    public function countArgumentsWrapper(): array
+    public function countArgumentsWrapper($args): array
     {
-        // put your code here
+        if ($args) {
+            if (is_array($args)) {
+                foreach ($args as $arg) {
+                    if (!is_string($arg)) {
+                        throw new InvalidArgumentException('Arg should be a string');
+                    }
+                }
+            } else {
+                if (!is_string($args)) {
+                    throw new InvalidArgumentException('Arg should be a string');
+                }
+            }
+        }
+
+        return $this->countArguments(...$args);
     }
 }
