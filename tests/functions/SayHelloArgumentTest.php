@@ -19,20 +19,17 @@ class SayHelloArgumentTest extends TestCase
      */
     public function testCorrectDataType($input, $expected)
     {
-        $this->assertEquals($expected, $this->functions->sayHelloArgument($input));
+        $this->assertEquals('Hello ' . $expected, $this->functions->sayHelloArgument($input));
     }
 
     public function correctDataTypeProvider(): array
     {
-        $functions = new \functions\Functions();
-        $hello = $functions->sayHello();
-
         return [
-            [10, $hello . ' 10'],
-            ['Alex', $hello . ' Alex'],
-            ['cat', $hello . ' cat'],
-            [true, $hello . ' 1'],
-            [false, $hello . ' '],
+            [10, '10'],
+            ['Alex', 'Alex'],
+            ['cat', 'cat'],
+            [true, '1'],
+            [false, ''],
         ];
     }
 }

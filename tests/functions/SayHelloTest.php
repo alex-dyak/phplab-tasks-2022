@@ -14,7 +14,7 @@ class SayHelloTest extends TestCase
         $this->functions = new functions\Functions();
     }
 
-    public function testPositive()
+    public function testCorrectResult()
     {
         $this->assertEquals('Hello', $this->functions->sayHello());
     }
