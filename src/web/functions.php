@@ -11,7 +11,16 @@
  */
 function getUniqueFirstLetters(array $airports)
 {
-    // put your logic here
+    $first_letters = [];
 
-    return ['A', 'B', 'C'];
+    foreach ($airports as $airport) {
+        $name_first_letter = substr($airport['name'], 0, 1);
+        if (!in_array($name_first_letter, $first_letters)) {
+            $first_letters[] = $name_first_letter;
+        }
+    }
+
+    sort($first_letters);
+
+    return $first_letters;
 }
