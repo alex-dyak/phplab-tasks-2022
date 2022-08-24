@@ -133,16 +133,16 @@ function getAirportsPerPage ($airports, $offset, $page): array
             <?php
             if ($query_string) {
                 $href = str_contains($query_string, 'filter_by_first_letter')
-                    ? $_SERVER['DOCUMENT_URI'] . '?' . substr_replace($query_string, $letter, -1, 1)
-                    : $_SERVER['DOCUMENT_URI'] . '?' . $query_string . '&filter_by_first_letter=' . $letter;
+                    ? $_SERVER['SCRIPT_NAME'] . '?' . substr_replace($query_string, $letter, -1, 1)
+                    : $_SERVER['SCRIPT_NAME'] . '?' . $query_string . '&filter_by_first_letter=' . $letter;
             } else {
-                $href = $_SERVER['DOCUMENT_URI'] . '?filter_by_first_letter=' . $letter;
+                $href = $_SERVER['SCRIPT_NAME'] . '?filter_by_first_letter=' . $letter;
             }
             ?>
             <a href="<?php echo $href ?>"><?= $letter ?></a>
         <?php endforeach; ?>
 
-        <a href="<?= $_SERVER['DOCUMENT_URI'] ?>" class="float-right">Reset all filters</a>
+        <a href="<?= $_SERVER['SCRIPT_NAME'] ?>" class="float-right">Reset all filters</a>
     </div>
 
     <!--
@@ -157,7 +157,7 @@ function getAirportsPerPage ($airports, $offset, $page): array
     -->
     <table class="table">
         <thead>
-        <?php $href = $query_string ? $_SERVER['DOCUMENT_URI'] . '?' . $query_string . '&sort=' : $_SERVER['DOCUMENT_URI'] . '?sort='; ?>
+        <?php $href = $query_string ? $_SERVER['SCRIPT_NAME'] . '?' . $query_string . '&sort=' : $_SERVER['SCRIPT_NAME'] . '?sort='; ?>
         <tr>
             <th scope="col"><a href="<?= $href . 'name' ?>">Name</a></th>
             <th scope="col"><a href="<?= $href . 'code' ?>">Code</a></th>
@@ -182,10 +182,10 @@ function getAirportsPerPage ($airports, $offset, $page): array
         <?php
             if ($query_string) {
                 $href = str_contains($query_string, 'filter_by_state')
-                    ? $_SERVER['DOCUMENT_URI'] . '?' . $query_string
-                    : $_SERVER['DOCUMENT_URI'] . '?filter_by_state=' . $airport['state'] .'&' . $query_string;
+                    ? $_SERVER['SCRIPT_NAME'] . '?' . $query_string
+                    : $_SERVER['SCRIPT_NAME'] . '?filter_by_state=' . $airport['state'] .'&' . $query_string;
             } else {
-                $href = $_SERVER['DOCUMENT_URI'] . '?filter_by_state=' . $airport['state'];
+                $href = $_SERVER['SCRIPT_NAME'] . '?filter_by_state=' . $airport['state'];
             }
             ?>
         <tr>
@@ -214,7 +214,7 @@ function getAirportsPerPage ($airports, $offset, $page): array
             <?php for ($i = 1; $i <= $page_num; $i++) : ?>
                 <?php
                 $active = ($i == $page) || (!isset($page) && $i == 1) ? 'active' : '';
-                $href = $_SERVER['DOCUMENT_URI'] . '?page=' . $i . '&' . $query_string;
+                $href = $_SERVER['SCRIPT_NAME'] . '?page=' . $i . '&' . $query_string;
                 ?>
                 <li class="page-item <?php echo $active ?>">
                     <a class="page-link" href="<?php echo $href ?>">
