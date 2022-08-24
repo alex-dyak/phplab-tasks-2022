@@ -26,31 +26,20 @@ $query_string = http_build_query($_GET);
  * (see Filtering tasks 1 and 2 below)
  */
 // Filtering tasks 1.
-$filter_by_first_letter = filter_input(INPUT_GET, 'filter_by_first_letter');
-if ($filter_by_first_letter) {
-    $temp = [];
-    foreach ($airports as $airport) {
-        if (substr($airport['name'], 0, 1) === $filter_by_first_letter) {
-            $temp[] = $airport;
-        }
-    }
-    $airports = $temp;
+$first_letter = filter_input(INPUT_GET, 'filter_by_first_letter');
+if ($first_letter) {
+    $airports = filterAirports($airports, $first_letter, null);
 }
+
 // Filtering tasks 2.
-$filter_by_state = filter_input(INPUT_GET, 'filter_by_state');
-if ($filter_by_state) {
-    $temp = [];
-    foreach ($airports as $airport) {
-        if ($airport['state'] === $filter_by_state) {
-            $temp[] = $airport;
-        }
-    }
-    $airports = $temp;
+$state = filter_input(INPUT_GET, 'filter_by_state');
+if ($state) {
+    $airports = filterAirports($airports, null, $state);
 }
 // End Filtering
 
 // For unfiltered pages airports per page is 20. For filtered is 5.
-$offset = (!$filter_by_first_letter && !$filter_by_state) ? 20 : 5;
+$offset = (!$first_letter && !$state) ? 20 : 5;
 
 // Sorting
 /**
@@ -59,18 +48,9 @@ $offset = (!$filter_by_first_letter && !$filter_by_state) ? 20 : 5;
  * (see Sorting task below)
  */
 if ($sort_column) {
-    $sort_airports = getAirportsPerPage($airports, $offset, $page);
-    // Get values by column name.
-    $sort_column_values = array_column($sort_airports, $sort_column);
-    array_multisort($sort_column_values, SORT_ASC, $sort_airports);
-    // Set new keys for items for replacing in $airports.
-    $airports_on_page = [];
-    foreach ($sort_airports as $key => $air) {
-        $new_key = $page > 1 ? $offset * ($page - 1) + $key : $key;
-        $airports_on_page[$new_key] = $air;
-    }
-    $airports = array_replace($airports, $airports_on_page);
+    $airports = sortAirports($airports, $sort_column, $page, $offset);
 }
+
 // End Sorting
 
 // Pagination
@@ -83,26 +63,6 @@ $page_num = ceil(count($airports) / $offset);
 // Replace $airports per page.
 $airports = getAirportsPerPage($airports, $offset, $page);
 // End Pagination
-
-/**
- * Get Airports function.
- * Getting part of $airports array to use it in sort and pagination.
- *
- * @param $airports
- * @param $offset
- *
- * @return array
- */
-function getAirportsPerPage ($airports, $offset, $page): array
-{
-    if (!$page) {
-        $airports = array_slice($airports, 0, $offset);
-    } else {
-        $airports = array_slice($airports, ($page - 1) * $offset, $offset);
-    }
-
-    return $airports;
-}
 ?>
 <!doctype html>
 <html lang="en">
@@ -162,7 +122,7 @@ function getAirportsPerPage ($airports, $offset, $page): array
         <thead>
         <?php
         $page_param = $page ? 'page=' . $page . '&' : '';
-        $href = $query_string ? $_SERVER['SCRIPT_NAME'] . '?' . $page_param . $query_string . '&sort=' : $_SERVER['SCRIPT_NAME'] . '?sort=';
+        $href = $query_string ? $_SERVER['SCRIPT_NAME'] . '?' . $page_param . $query_string . '&sort=' : $_SERVER['SCRIPT_NAME'] . '?' . $page_param . 'sort=';
         ?>
         <tr>
             <th scope="col"><a href="<?= $href . 'name' ?>">Name</a></th>
