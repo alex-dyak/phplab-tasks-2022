@@ -18,8 +18,6 @@ if ($sort_column) {
 }
 // Build query string without page number and without sort.
 $query_string = http_build_query($_GET);
-// For unfiltered pages airports per page is 20. For filtered is 5.
-$offset = (!isset($_GET['filter_by_first_letter']) && !isset($_GET['filter_by_state'])) ? 20 : 5;
 
 // Filtering
 /**
@@ -28,26 +26,31 @@ $offset = (!isset($_GET['filter_by_first_letter']) && !isset($_GET['filter_by_st
  * (see Filtering tasks 1 and 2 below)
  */
 // Filtering tasks 1.
-if (isset($_GET['filter_by_first_letter'])) {
+$filter_by_first_letter = filter_input(INPUT_GET, 'filter_by_first_letter');
+if ($filter_by_first_letter) {
     $temp = [];
     foreach ($airports as $airport) {
-        if (substr($airport['name'], 0, 1) === $_GET['filter_by_first_letter']) {
+        if (substr($airport['name'], 0, 1) === $filter_by_first_letter) {
             $temp[] = $airport;
         }
     }
     $airports = $temp;
 }
 // Filtering tasks 2.
-if (isset($_GET['filter_by_state'])) {
+$filter_by_state = filter_input(INPUT_GET, 'filter_by_state');
+if ($filter_by_state) {
     $temp = [];
     foreach ($airports as $airport) {
-        if ($airport['state'] === $_GET['filter_by_state']) {
+        if ($airport['state'] === $filter_by_state) {
             $temp[] = $airport;
         }
     }
     $airports = $temp;
 }
 // End Filtering
+
+// For unfiltered pages airports per page is 20. For filtered is 5.
+$offset = (!$filter_by_first_letter && !$filter_by_state) ? 20 : 5;
 
 // Sorting
 /**
@@ -157,7 +160,10 @@ function getAirportsPerPage ($airports, $offset, $page): array
     -->
     <table class="table">
         <thead>
-        <?php $href = $query_string ? $_SERVER['SCRIPT_NAME'] . '?' . $query_string . '&sort=' : $_SERVER['SCRIPT_NAME'] . '?sort='; ?>
+        <?php
+        $page_param = $page ? 'page=' . $page . '&' : '';
+        $href = $query_string ? $_SERVER['SCRIPT_NAME'] . '?' . $page_param . $query_string . '&sort=' : $_SERVER['SCRIPT_NAME'] . '?sort=';
+        ?>
         <tr>
             <th scope="col"><a href="<?= $href . 'name' ?>">Name</a></th>
             <th scope="col"><a href="<?= $href . 'code' ?>">Code</a></th>
