@@ -8,12 +8,12 @@ $query_args = [];
 $page = 1;
 $sort_column = '';
 // Unset 'page' and 'sort' GET params to build correct query string for filtering and sorting.
-if (isset($_GET['page'])) {
-    $page = $_GET['page'];
+$page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+if ($page) {
     unset($_GET['page']);
 }
-if (isset($_GET['sort'])) {
-    $sort_column = $_GET['sort'];
+$sort_column = filter_input(INPUT_GET, 'sort');
+if ($sort_column) {
     unset($_GET['sort']);
 }
 // Build query string without page number and without sort.
@@ -214,7 +214,11 @@ function getAirportsPerPage ($airports, $offset, $page): array
             <?php for ($i = 1; $i <= $page_num; $i++) : ?>
                 <?php
                 $active = ($i == $page) || (!isset($page) && $i == 1) ? 'active' : '';
-                $href = $_SERVER['SCRIPT_NAME'] . '?page=' . $i . '&' . $query_string;
+                if ($query_string) {
+                    $href = $_SERVER['SCRIPT_NAME'].'?page='.$i.'&'.$query_string;
+                } else {
+                    $href = $_SERVER['SCRIPT_NAME'].'?page='.$i;
+                }
                 ?>
                 <li class="page-item <?php echo $active ?>">
                     <a class="page-link" href="<?php echo $href ?>">
