@@ -3,12 +3,43 @@ require_once './functions.php';
 
 $airports = require './airports.php';
 
+// Set query string.
+$query_args = [];
+$page = 1;
+$sort_column = '';
+// Unset 'page' and 'sort' GET params to build correct query string for filtering and sorting.
+$page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT);
+if ($page) {
+    unset($_GET['page']);
+}
+$sort_column = filter_input(INPUT_GET, 'sort');
+if ($sort_column) {
+    unset($_GET['sort']);
+}
+// Build query string without page number and without sort.
+$query_string = http_build_query($_GET);
+
 // Filtering
 /**
  * Here you need to check $_GET request if it has any filtering
  * and apply filtering by First Airport Name Letter and/or Airport State
  * (see Filtering tasks 1 and 2 below)
  */
+// Filtering tasks 1.
+$first_letter = filter_input(INPUT_GET, 'filter_by_first_letter');
+if ($first_letter) {
+    $airports = filterAirports($airports, $first_letter, null);
+}
+
+// Filtering tasks 2.
+$state = filter_input(INPUT_GET, 'filter_by_state');
+if ($state) {
+    $airports = filterAirports($airports, null, $state);
+}
+// End Filtering
+
+// For unfiltered pages airports per page is 20. For filtered is 5.
+$offset = (!$first_letter && !$state) ? 20 : 5;
 
 // Sorting
 /**
@@ -16,6 +47,11 @@ $airports = require './airports.php';
  * and apply sorting
  * (see Sorting task below)
  */
+if ($sort_column) {
+    $airports = sortAirports($airports, $sort_column, $page, $offset);
+}
+
+// End Sorting
 
 // Pagination
 /**
@@ -23,6 +59,10 @@ $airports = require './airports.php';
  * and apply pagination logic
  * (see Pagination task below)
  */
+$page_num = ceil(count($airports) / $offset);
+// Replace $airports per page.
+$airports = getAirportsPerPage($airports, $offset, $page);
+// End Pagination
 ?>
 <!doctype html>
 <html lang="en">
@@ -53,10 +93,19 @@ $airports = require './airports.php';
         Filter by first letter:
 
         <?php foreach (getUniqueFirstLetters(require './airports.php') as $letter): ?>
-            <a href="#"><?= $letter ?></a>
+            <?php
+            if ($query_string) {
+                $href = str_contains($query_string, 'filter_by_first_letter')
+                    ? $_SERVER['SCRIPT_NAME'] . '?' . substr_replace($query_string, $letter, -1, 1)
+                    : $_SERVER['SCRIPT_NAME'] . '?' . $query_string . '&filter_by_first_letter=' . $letter;
+            } else {
+                $href = $_SERVER['SCRIPT_NAME'] . '?filter_by_first_letter=' . $letter;
+            }
+            ?>
+            <a href="<?php echo $href ?>"><?= $letter ?></a>
         <?php endforeach; ?>
 
-        <a href="/" class="float-right">Reset all filters</a>
+        <a href="<?= $_SERVER['SCRIPT_NAME'] ?>" class="float-right">Reset all filters</a>
     </div>
 
     <!--
@@ -71,11 +120,15 @@ $airports = require './airports.php';
     -->
     <table class="table">
         <thead>
+        <?php
+        $page_param = $page ? 'page=' . $page . '&' : '';
+        $href = $query_string ? $_SERVER['SCRIPT_NAME'] . '?' . $page_param . $query_string . '&sort=' : $_SERVER['SCRIPT_NAME'] . '?' . $page_param . 'sort=';
+        ?>
         <tr>
-            <th scope="col"><a href="#">Name</a></th>
-            <th scope="col"><a href="#">Code</a></th>
-            <th scope="col"><a href="#">State</a></th>
-            <th scope="col"><a href="#">City</a></th>
+            <th scope="col"><a href="<?= $href . 'name' ?>">Name</a></th>
+            <th scope="col"><a href="<?= $href . 'code' ?>">Code</a></th>
+            <th scope="col"><a href="<?= $href . 'state' ?>">State</a></th>
+            <th scope="col"><a href="<?= $href . 'city' ?>">City</a></th>
             <th scope="col">Address</th>
             <th scope="col">Timezone</th>
         </tr>
@@ -92,10 +145,19 @@ $airports = require './airports.php';
                i.e. if you have filter_by_first_letter set you can additionally use filter_by_state
         -->
         <?php foreach ($airports as $airport): ?>
+        <?php
+            if ($query_string) {
+                $href = str_contains($query_string, 'filter_by_state')
+                    ? $_SERVER['SCRIPT_NAME'] . '?' . $query_string
+                    : $_SERVER['SCRIPT_NAME'] . '?filter_by_state=' . $airport['state'] .'&' . $query_string;
+            } else {
+                $href = $_SERVER['SCRIPT_NAME'] . '?filter_by_state=' . $airport['state'];
+            }
+            ?>
         <tr>
             <td><?= $airport['name'] ?></td>
             <td><?= $airport['code'] ?></td>
-            <td><a href="#"><?= $airport['state'] ?></a></td>
+            <td><a href="<?php echo $href ?>"><?= $airport['state'] ?></a></td>
             <td><?= $airport['city'] ?></td>
             <td><?= $airport['address'] ?></td>
             <td><?= $airport['timezone'] ?></td>
@@ -115,9 +177,21 @@ $airports = require './airports.php';
     -->
     <nav aria-label="Navigation">
         <ul class="pagination justify-content-center">
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <?php for ($i = 1; $i <= $page_num; $i++) : ?>
+                <?php
+                $active = ($i == $page) || (!isset($page) && $i == 1) ? 'active' : '';
+                if ($query_string) {
+                    $href = $_SERVER['SCRIPT_NAME'].'?page='.$i.'&'.$query_string;
+                } else {
+                    $href = $_SERVER['SCRIPT_NAME'].'?page='.$i;
+                }
+                ?>
+                <li class="page-item <?php echo $active ?>">
+                    <a class="page-link" href="<?php echo $href ?>">
+                        <?php echo $i ?>
+                    </a>
+                </li>
+            <?php endfor; ?>
         </ul>
     </nav>
 
