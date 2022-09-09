@@ -117,7 +117,6 @@ if ($state) {
     $sql       .= $connector." state_id = :state_id ";
 }
 
-//$sql .= $sort_column ? "ORDER BY :sort_column " :  "ORDER BY a.id ";
 $sql .= "ORDER BY a.id ";
 $sql .= "LIMIT :limit OFFSET :offset;";
 
@@ -143,9 +142,6 @@ if ($first_letter) {
 if ($state) {
     $sth->bindParam(':state_id', $state_id, \PDO::PARAM_STR);
 }
-//if ($sort_column) {
-//    $sth->bindParam(':sort_column', $sort_column, \PDO::PARAM_STR);
-//}
 
 $sth->setFetchMode(\PDO::FETCH_ASSOC);
 $sth->execute();
